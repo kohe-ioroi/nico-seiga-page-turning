@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ニコニコ静画・春画のページめくり
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  ニコニコ静画・春画のページめくり機能を追加します。
 // @author       Kouhei Ioroi(https://ioroi.org)
 // @match        https://seiga.nicovideo.jp/seiga/im*
@@ -41,7 +41,7 @@ function データ検索(uri,pager){
     }
     if(pager == 0){pager =+1}
     let searchuri = ""
-    if(location.search.length != 0){
+    if(document.querySelector("li.user_link").querySelector("a").search.length != 0){
         searchuri = uri + "&page=" + pager
     }else{
         searchuri = uri + "?page=" + pager
@@ -96,7 +96,6 @@ function データ検索(uri,pager){
                     }).then(response => response.text())
                         .then(text => {
                         let dom = new DOMParser().parseFromString(text, "text/html").querySelectorAll(".illust_list a");
-                        console.log(dom);
                         if (dom.length > 0){
                             before_illust = dom[dom.length -1].href;
                             document.querySelector("#illust_switcher_before").href = before_illust;
