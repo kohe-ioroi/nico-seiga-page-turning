@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ニコニコ静画・春画のページめくり
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  ニコニコ静画・春画のページめくり機能を追加します。
 // @author       Kouhei Ioroi(https://ioroi.org)
 // @match        https://seiga.nicovideo.jp/seiga/im*
@@ -15,7 +15,6 @@
 })();
 
 function データ検索(uri,pager){
-    console.log("pager:" + pager)
     if(pager == 0){
         let menu = document.createElement("div");
         menu.id = "illust_switcher";
@@ -41,7 +40,13 @@ function データ検索(uri,pager){
         document.querySelector("p.discription").childNodes[0].before(menu);
     }
     if(pager == 0){pager =+1}
-    fetch(uri + "&page=" + pager, {
+    let searchuri = ""
+    if(location.search.length != 0){
+        searchuri = uri + "&page=" + pager
+    }else{
+        searchuri = uri + "?page=" + pager
+    }
+    fetch(searchuri, {
         method: "GET",
     }).then(response => response.text())
         .then(text => {
@@ -56,8 +61,13 @@ function データ検索(uri,pager){
                     after_illust = i.parentNode.nextElementSibling.childNodes[0].href;
                     document.querySelector("#illust_switcher_after").href = after_illust;
                 }else{
-                    console.log(uri + "&page=" + (Number(pager) + 1))
-                    fetch(uri + "&page=" + (Number(pager) + 1), {
+                    let searchuri = ""
+                    if(location.search.length != 0){
+                        searchuri = uri + "&page=" + (Number(pager) + 1)
+                    }else{
+                        searchuri = uri + "?page=" + (Number(pager) + 1)
+                    }
+                    fetch(searchuri ,{
                         method: "GET",
                     }).then(response => response.text())
                         .then(text => {
@@ -75,7 +85,13 @@ function データ検索(uri,pager){
                     before_illust = i.parentNode.previousElementSibling.childNodes[0].href;
                     document.querySelector("#illust_switcher_before").href = before_illust;
                 }else if(pager > 1){
-                    fetch(uri + "&page=" + (Number(pager) -1), {
+                    let searchuri = ""
+                    if(location.search.length != 0){
+                        searchuri = uri + "&page=" + (Number(pager) - 1)
+                    }else{
+                        searchuri = uri + "?page=" + (Number(pager) - 1)
+                    }
+                    fetch(searchuri, {
                         method: "GET",
                     }).then(response => response.text())
                         .then(text => {
