@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ニコニコ静画・春画のページめくり
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  ニコニコ静画・春画のページめくり機能を追加します。
 // @author       Kouhei Ioroi(https://ioroi.org)
 // @match        https://seiga.nicovideo.jp/seiga/im*
@@ -16,14 +16,36 @@
     let match = location.pathname.split("/")[1];
     switch (match){
         case "user": //ユーザーページ
-            localStorage.setItem("_beforeLink",location.href);
+            if(sessionStorage.getItem("__beforeLink") == "null"){
+                sessionStorage.setItem("__beforeLink",sessionStorage.getItem("_beforeLink"))
+            }
+            if(sessionStorage.getItem("_beforeLink") != location.href){
+                sessionStorage.setItem("__beforeLink",sessionStorage.getItem("_beforeLink"))
+                sessionStorage.setItem("_beforeLink",location.href)
+            }
+            history.pushState(null, null, null);
+            window.addEventListener('popstate', function(e) {
+                sessionStorage.setItem("_beforeLink",sessionStorage.getItem("__beforeLink"));
+                history.go(-2);
+            });
             break;
         case "seiga":
             console.log("静画が判定されました。")
-            データ検索(localStorage.getItem("_beforeLink"),1);
+            データ検索(sessionStorage.getItem("_beforeLink"),1);
             break;
         case "tag":
-            localStorage.setItem("_beforeLink",location.href);
+            if(sessionStorage.getItem("__beforeLink") == "null"){
+                sessionStorage.setItem("__beforeLink",sessionStorage.getItem("_beforeLink"))
+            }
+            if(sessionStorage.getItem("_beforeLink") != location.href){
+                sessionStorage.setItem("__beforeLink",sessionStorage.getItem("_beforeLink"))
+                sessionStorage.setItem("_beforeLink",location.href)
+            }
+            history.pushState(null, null, null);
+            window.addEventListener('popstate', function(e) {
+                sessionStorage.setItem("_beforeLink",sessionStorage.getItem("__beforeLink"));
+                history.go(-2);
+            });
             break;
         default:
             break;
@@ -44,7 +66,7 @@ function データ検索(uri,pager){
         let mid = document.createElement("a");
         mid.id = "illust_switcher_mid";
         mid.innerText = "イラスト一覧";
-        mid.href = localStorage.getItem("_beforeLink");
+        mid.href = sessionStorage.getItem("_beforeLink");
         menu.appendChild(mid);
         let mid_slash_2 = document.createElement("text");
         mid_slash_2.innerText = " / ";
@@ -56,7 +78,7 @@ function データ検索(uri,pager){
         document.querySelector("p.discription").childNodes[0].before(menu);
     }
     let searchuri = ""
-    if(localStorage.getItem("_beforeLink").split("?").length >= 2){
+    if(sessionStorage.getItem("_beforeLink").split("?").length >= 2){
         searchuri = uri + "&page=" + pager
     }else{
         searchuri = uri + "?page=" + pager
@@ -76,7 +98,7 @@ function データ検索(uri,pager){
                     document.querySelector("#illust_switcher_after").href = after_illust;
                 }else{
                     let searchuri = ""
-                    if(localStorage.getItem("_beforeLink").split("?").length >= 2){
+                    if(sessionStorage.getItem("_beforeLink").split("?").length >= 2){
                         searchuri = uri + "&page=" + (Number(pager) + 1)
                     }else{
                         searchuri = uri + "?page=" + (Number(pager) + 1)
@@ -101,7 +123,7 @@ function データ検索(uri,pager){
                     document.querySelector("#illust_switcher_before").href = before_illust;
                 }else if(pager > 1){
                     let searchuri = ""
-                    if(localStorage.getItem("_beforeLink").split("?").length >= 2){
+                    if(sessionStorage.getItem("_beforeLink").split("?").length >= 2){
                         searchuri = uri + "&page=" + (Number(pager) - 1)
                     }else{
                         searchuri = uri + "?page=" + (Number(pager) - 1)
