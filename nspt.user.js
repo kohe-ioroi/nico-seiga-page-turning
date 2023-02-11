@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ニコニコ静画・春画のページめくり
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  ニコニコ静画・春画のページめくり機能を追加します。
 // @author       Kouhei Ioroi(https://ioroi.org)
 // @match        https://seiga.nicovideo.jp/seiga/im*
@@ -30,7 +30,6 @@
             });
             break;
         case "seiga":
-            console.log("静画が判定されました。")
             データ検索(sessionStorage.getItem("_beforeLink"),1);
             break;
         case "tag":
@@ -66,7 +65,14 @@ function データ検索(uri,pager){
         let mid = document.createElement("a");
         mid.id = "illust_switcher_mid";
         mid.innerText = "イラスト一覧";
-        mid.href = sessionStorage.getItem("_beforeLink");
+        if(String(sessionStorage.getItem("_beforeLink")) == "null" & document.querySelector("li.user_link a") != null){
+            mid.href = document.querySelector("li.user_link a").href
+        }else if(String(sessionStorage.getItem("_beforeLink")) == "null" & document.querySelector("li.user_link a") == null){
+            mid.href = "";
+            mid.onclick = ()=>{history.back()};
+        }else{
+            mid.href = sessionStorage.getItem("_beforeLink");
+        }
         menu.appendChild(mid);
         let mid_slash_2 = document.createElement("text");
         mid_slash_2.innerText = " / ";
@@ -77,12 +83,19 @@ function データ検索(uri,pager){
         menu.appendChild(after);
         document.querySelector("p.discription").childNodes[0].before(menu);
     }
-    let searchuri = ""
-    if(sessionStorage.getItem("_beforeLink").split("?").length >= 2){
-        searchuri = uri + "&page=" + pager
+    let searchuri = "";
+    if(String(sessionStorage.getItem("_beforeLink")) != "null"){
+        if(sessionStorage.getItem("_beforeLink").split("?").length >= 2){
+            searchuri = uri + "&page=" + pager
+        }else{
+            searchuri = uri + "?page=" + pager
+        }
+    }else if(document.querySelector("li.user_link a") != null){
+        searchuri = document.querySelector("li.user_link a").href;
     }else{
-        searchuri = uri + "?page=" + pager
+        return;
     }
+
     fetch(searchuri, {
         method: "GET",
     }).then(response => response.text())
@@ -103,7 +116,6 @@ function データ検索(uri,pager){
                     }else{
                         searchuri = uri + "?page=" + (Number(pager) + 1)
                     }
-                    console.log(searchuri)
                     fetch(searchuri ,{
                         method: "GET",
                     }).then(response => response.text())
